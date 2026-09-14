@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Document Management | UniAdmission.AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="card-glass p-4 mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between">
+            <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fas fa-folder-open text-indigo me-2"></i> Document Verification Checklist</h3>
+                <p class="text-secondary small mb-0">Upload required marksheets and identity proofs for OpenCV + Pytesseract OCR verification</p>
+            </div>
+            <a href="{{ url_for('eligibility.check_eligibility') }}" class="btn btn-emerald btn-sm rounded-pill mt-2 mt-sm-0">
+                Proceed to Eligibility Check <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- DigiLocker Prototype Notice Alert -->
+    <div class="alert alert-info card-glass border-0 d-flex align-items-center mb-4">
+        <i class="fas fa-shield-alt text-info fs-3 me-3"></i>
+        <div>
+            <h6 class="fw-bold text-white mb-1">DigiLocker Integration Prototype Mode</h6>
+            <p class="mb-0 small text-secondary">
+                This project implements a simulated DigiLocker verification pipeline. Clicking "Verify with DigiLocker" runs the prototype verification process without requiring live API credentials.
+            </p>
+        </div>
+    </div>
+
+    <!-- Document Table -->
+    <div class="card-glass p-4 mb-4">
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>Document Type</th>
+                        <th>Required</th>
+                        <th>File Status</th>
+                        <th>OCR Verification</th>
+                        <th>DigiLocker</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in checklist %}
+                    {% set doc = item.doc_data %}
+                    <tr>
+                        <td class="fw-bold text-white">
+                            <i class="fas fa-file-pdf text-danger me-2"></i> {{ item.type }}
+                        </td>
+                        <td><span class="badge bg-secondary">Mandatory</span></td>
+                        <td>
+                            {% if item.is_uploaded %}
+                                <span class="badge bg-success-subtle text-success border border-success"><i class="fas fa-check me-1"></i> Uploaded</span>
+                                <div class="small text-muted">{{ doc.file_name }}</div>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger"><i class="fas fa-times me-1"></i> Missing</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.is_uploaded %}
+                                {% if doc.verification_status == 'VERIFIED' %}
+                                    <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> VERIFIED</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i> REVIEW REQUIRED</span>
+                                {% endif %}
+                                <div class="small text-secondary mt-1">{{ doc.verification_message or 'Processed' }}</div>
+                            {% else %}
+                                <span class="text-secondary small">&mdash;</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.is_uploaded and doc.is_digilocker %}
+                                <span class="badge bg-info text-dark"><i class="fas fa-shield-alt me-1"></i> DIGILOCKER VERIFIED</span>
+                            {% else %}
+                                <div id="digiStatus_{{ item.type | replace(' ', '_') }}">
+                                    <button type="button" class="btn btn-outline-info btn-sm rounded-pill" onclick="triggerDigiLockerSim('{{ item.type }}')">
+                                        <i class="fas fa-link me-1"></i> Verify via DigiLocker
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-primary-custom me-1" data-bs-toggle="modal" data-bs-target="#uploadModal_{{ loop.index }}">
+                                <i class="fas fa-upload me-1"></i> Upload
+                            </button>
+                            {% if item.is_uploaded %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary me-1" data-bs-toggle="modal" data-bs-target="#ocrModal_{{ doc.id }}">
+                                    <i class="fas fa-eye me-1"></i> OCR Audit
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <!-- Upload Modal -->
+                    <div class="modal fade" id="uploadModal_{{ loop.index }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content card-glass border-0">
+                                <div class="modal-header border-secondary">
+                                    <h5 class="modal-title text-white"><i class="fas fa-file-upload text-indigo me-2"></i> Upload {{ item.type }}</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="POST" action="{{ url_for('documents.upload_document') }}" enctype="multipart/form-data">
+                                    <div class="modal-body">
+                                        <input type="hidden" name="document_type" value="{{ item.type }}">
+                                        <div class="mb-3">
+                                            <label class="form-label text-secondary small">Select File (PDF, JPG, PNG &bull; Max 16MB)</label>
+                                            <input type="file" name="file" class="form-control form-control-dark" accept=".pdf,.jpg,.jpeg,.png" required>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-secondary">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary-custom btn-sm"><i class="fas fa-upload me-1"></i> Start Upload & OCR</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OCR Inspection Modal -->
+                    {% if item.is_uploaded %}
+                    <div class="modal fade" id="ocrModal_{{ doc.id }}" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content card-glass border-0">
+                                <div class="modal-header border-secondary">
+                                    <h5 class="modal-title text-white"><i class="fas fa-microchip text-indigo me-2"></i> OCR Text Extraction & Audit &bull; {{ item.type }}</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <span class="text-secondary small d-block mb-1">Verification Status:</span>
+                                        <span class="badge bg-success fs-6"><i class="fas fa-check-circle me-1"></i> {{ doc.verification_status }}</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <span class="text-secondary small d-block mb-1">Extracted Text via OpenCV / Pytesseract Pipeline:</span>
+                                        <pre class="bg-dark p-3 rounded text-info border border-secondary" style="font-size: 0.85rem; max-height: 250px; overflow-y: auto;">{{ doc.ocr_text or 'No raw text extracted.' }}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

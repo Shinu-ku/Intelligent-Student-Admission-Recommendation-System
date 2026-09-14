@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account | Intelligent Student Admission System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card-glass p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex p-3 rounded-circle bg-dark text-indigo mb-2 fs-3">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h3 class="fw-bold text-white mb-1">Student Registration</h3>
+                    <p class="text-secondary small">Start your university application process</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.register') }}">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label text-secondary small fw-semibold">Full Name *</label>
+                            <input type="text" name="full_name" class="form-control form-control-dark" placeholder="e.g. Soumya Kushwah" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">Email Address *</label>
+                            <input type="email" name="email" class="form-control form-control-dark" placeholder="student@example.com" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">Phone Number</label>
+                            <input type="tel" name="phone" class="form-control form-control-dark" placeholder="+91 98765 43210">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">Date of Birth</label>
+                            <input type="date" name="dob" class="form-control form-control-dark">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">Password * (Min 8 chars)</label>
+                            <input type="password" name="password" class="form-control form-control-dark" placeholder="At least 8 characters" minlength="8" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-secondary small fw-semibold">Confirm Password *</label>
+                            <input type="password" name="confirm_password" class="form-control form-control-dark" placeholder="Re-enter password" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-custom w-100 py-2 mt-4 mb-3">
+                        <i class="fas fa-check-circle me-2"></i> Register & Continue
+                    </button>
+                </form>
+
+                <div class="mt-3 text-center text-secondary small">
+                    Already registered? <a href="{{ url_for('auth.login') }}" class="text-indigo text-decoration-none fw-semibold">Log In Here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

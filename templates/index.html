@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Intelligent Student Admission System | Home{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5 py-4">
+        <div class="col-lg-7 text-center text-lg-start mb-4 mb-lg-0">
+            <span class="badge bg-indigo-subtle text-indigo border border-indigo rounded-pill px-3 py-2 mb-3">
+                <i class="fas fa-microchip me-1"></i> Next-Gen University Admission Platform
+            </span>
+            <h1 class="display-3 fw-bold text-white mb-3">
+                Smarter Admissions.<br>
+                <span class="brand-badge">Fairer Decisions.</span>
+            </h1>
+            <p class="lead text-secondary mb-4" style="max-width: 600px;">
+                An AI-powered admission decision-support platform that verifies applications, checks rule-based eligibility, analyzes candidate data with Random Forest XAI, and empowers admission officers to make transparent, informed decisions.
+            </p>
+            <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-3">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary-custom btn-lg shadow-lg">
+                    <i class="fas fa-paper-plane me-2"></i> Apply Now
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg rounded-3">
+                    <i class="fas fa-user-shield me-2"></i> Admission Officer Login
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card-glass p-4 text-center border-0">
+                <h5 class="text-indigo mb-3 fw-bold"><i class="fas fa-network-wired me-2"></i> End-to-End Workflow</h5>
+                <div class="d-flex flex-column gap-2 align-items-center">
+                    <div class="p-2 bg-dark rounded-3 border border-secondary text-white w-100"><i class="fas fa-user-edit text-info me-2"></i> 1. Application Submission</div>
+                    <i class="fas fa-arrow-down text-secondary"></i>
+                    <div class="p-2 bg-dark rounded-3 border border-secondary text-white w-100"><i class="fas fa-file-invoice text-warning me-2"></i> 2. Document & OCR Verification</div>
+                    <i class="fas fa-arrow-down text-secondary"></i>
+                    <div class="p-2 bg-dark rounded-3 border border-secondary text-white w-100"><i class="fas fa-check-double text-success me-2"></i> 3. Rule-Based Eligibility Check</div>
+                    <i class="fas fa-arrow-down text-secondary"></i>
+                    <div class="p-2 bg-dark rounded-3 border border-secondary text-white w-100"><i class="fas fa-brain text-purple me-2"></i> 4. AI Suitability & XAI Scoring</div>
+                    <i class="fas fa-arrow-down text-secondary"></i>
+                    <div class="p-2 bg-dark rounded-3 border border-indigo text-white w-100 border-2 fw-bold"><i class="fas fa-user-check text-indigo me-2"></i> 5. Officer Review & Human Override</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Statistics Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3 col-6">
+            <div class="card-glass p-4 text-center h-100">
+                <h2 class="display-5 fw-bold text-white mb-1">1,250+</h2>
+                <span class="text-secondary small text-uppercase">Applications Processed</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card-glass p-4 text-center h-100">
+                <h2 class="display-5 fw-bold text-emerald mb-1">94%</h2>
+                <span class="text-secondary small text-uppercase">Documents Verified</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card-glass p-4 text-center h-100">
+                <h2 class="display-5 fw-bold text-indigo mb-1">87%</h2>
+                <span class="text-secondary small text-uppercase">Average Suitability</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card-glass p-4 text-center h-100">
+                <h2 class="display-5 fw-bold text-amber mb-1">68%</h2>
+                <span class="text-secondary small text-uppercase">Processing Time Reduced</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core System Pillars -->
+    <div class="row g-4 mt-2">
+        <div class="col-md-4">
+            <div class="card-glass p-4 h-100">
+                <div class="text-indigo fs-1 mb-3"><i class="fas fa-eye"></i></div>
+                <h4 class="text-white fw-bold">Explainable AI (XAI)</h4>
+                <p class="text-secondary">Feature importance breakdown revealing exact academic and extracurricular weights behind every recommendation.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-glass p-4 h-100">
+                <div class="text-emerald fs-1 mb-3"><i class="fas fa-user-shield"></i></div>
+                <h4 class="text-white fw-bold">Human-in-the-Loop</h4>
+                <p class="text-secondary">AI recommends, human officers decide. Officers maintain full authority to override AI recommendations with recorded reasoning.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-glass p-4 h-100">
+                <div class="text-purple fs-1 mb-3"><i class="fas fa-file-contract"></i></div>
+                <h4 class="text-white fw-bold">OCR & Verification</h4>
+                <p class="text-secondary">Integrated OpenCV + Pytesseract marksheets scanner with DigiLocker prototype simulation for anti-fraud confidence.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

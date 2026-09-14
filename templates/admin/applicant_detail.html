@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Applicant 360° Review | {{ app.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Top Header -->
+    <div class="card-glass p-4 mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <div class="p-3 rounded-circle bg-dark text-indigo me-3 fs-3"><i class="fas fa-user-graduate"></i></div>
+                <div>
+                    <span class="badge bg-indigo text-white mb-1">Application ID: {{ app.application_number }}</span>
+                    <h2 class="fw-bold text-white mb-0">{{ app.full_name }}</h2>
+                    <span class="text-secondary small">{{ app.email }} &bull; {{ app.phone or 'No phone' }} &bull; Target Course: <strong class="text-white">{{ app.course }}</strong></span>
+                </div>
+            </div>
+            <a href="{{ url_for('admin.applications') }}" class="btn btn-outline-light rounded-pill mt-3 mt-sm-0">
+                <i class="fas fa-arrow-left me-1"></i> Back to Directory
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Side: 360 Candidate Info -->
+        <div class="col-lg-8">
+            <!-- Nav Tabs -->
+            <ul class="nav nav-pills custom-pills mb-3 card-glass p-2" id="applicantTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active text-white" id="academic-tab" data-bs-toggle="tab" data-bs-target="#academic" type="button"><i class="fas fa-graduation-cap me-1"></i> Academic Marks</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link text-white" id="docs-tab" data-bs-toggle="tab" data-bs-target="#docs" type="button"><i class="fas fa-folder-open me-1"></i> Documents & OCR</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link text-white" id="eligibility-tab" data-bs-toggle="tab" data-bs-target="#eligibility" type="button"><i class="fas fa-check-circle me-1"></i> Eligibility Audit</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link text-white" id="ai-tab" data-bs-toggle="tab" data-bs-target="#ai" type="button"><i class="fas fa-brain me-1"></i> AI Score & XAI</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="applicantTabContent">
+                <!-- Academic Tab -->
+                <div class="tab-pane fade show active card-glass p-4" id="academic" role="tabpanel">
+                    <h5 class="fw-bold text-white mb-3"><i class="fas fa-award text-indigo me-2"></i> Academic Records & Scores</h5>
+                    {% set ac = app.academic %}
+                    {% if ac %}
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <span class="text-secondary small d-block">Class 10 Percentage:</span>
+                            <span class="fs-5 fw-bold text-white">{{ ac.class10_percentage }}%</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-secondary small d-block">Class 12 Percentage:</span>
+                            <span class="fs-5 fw-bold text-emerald">{{ ac.class12_percentage }}%</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-secondary small d-block">Entrance Score ({{ ac.entrance_exam }}):</span>
+                            <span class="fs-5 fw-bold text-indigo">{{ ac.entrance_score }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-secondary small d-block">Mathematics:</span>
+                            <span class="fw-bold text-white">{{ ac.mathematics }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-secondary small d-block">Physics:</span>
+                            <span class="fw-bold text-white">{{ ac.physics }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-secondary small d-block">Chemistry:</span>
+                            <span class="fw-bold text-white">{{ ac.chemistry }}</span>
+                        </div>
+                        <div class="col-12 mt-3 pt-3 border-top border-secondary">
+                            <span class="text-secondary small d-block mb-1">Achievements & Awards:</span>
+                            <pre class="bg-dark p-3 rounded text-white small border border-secondary">{{ ac.achievements or 'None listed.' }}</pre>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-secondary">No academic information submitted yet.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Documents & OCR Tab -->
+                <div class="tab-pane fade card-glass p-4" id="docs" role="tabpanel">
+                    <h5 class="fw-bold text-white mb-3"><i class="fas fa-file-invoice text-indigo me-2"></i> Document Uploads & OCR Verification</h5>
+                    <div class="table-responsive">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Document Type</th>
+                                    <th>Status</th>
+                                    <th>DigiLocker</th>
+                                    <th>OCR Verification Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in app.documents %}
+                                <tr>
+                                    <td class="fw-bold text-white">{{ doc.document_type }}</td>
+                                    <td>
+                                        {% if doc.verification_status == 'VERIFIED' %}
+                                            <span class="badge bg-success">VERIFIED</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">REVIEW REQUIRED</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if doc.is_digilocker %}
+                                            <span class="badge bg-info text-dark">DIGILOCKER</span>
+                                        {% else %}
+                                            <span class="text-secondary small">Manual</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="small text-secondary">{{ doc.verification_message }}</td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="4" class="text-secondary">No documents uploaded.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Eligibility Tab -->
+                <div class="tab-pane fade card-glass p-4" id="eligibility" role="tabpanel">
+                    <h5 class="fw-bold text-white mb-3"><i class="fas fa-tasks text-emerald me-2"></i> Rule-Based Eligibility Audit</h5>
+                    {% set el = app.eligibility %}
+                    {% if el %}
+                        <div class="mb-3">
+                            <span class="text-secondary small">Overall Status: </span>
+                            {% if el.is_eligible %}
+                                <span class="badge bg-success fs-6">ELIGIBLE</span>
+                            {% else %}
+                                <span class="badge bg-danger fs-6">NOT ELIGIBLE</span>
+                            {% endif %}
+                        </div>
+                        <ul class="list-group list-group-flush bg-transparent">
+                            {% for c in el.summary.checks %}
+                            <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold me-2">{{ c.criterion }}:</span>
+                                    <span class="text-secondary">Score: {{ c.student_value }} (Req: {{ c.required_value }})</span>
+                                </div>
+                                {% if c.passed %}
+                                    <span class="badge bg-success"><i class="fas fa-check me-1"></i> PASS</span>
+                                {% else %}
+                                    <span class="badge bg-danger"><i class="fas fa-times me-1"></i> FAIL</span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-secondary">Eligibility check not performed yet.</p>
+                    {% endif %}
+                </div>
+
+                <!-- AI Score & XAI Tab -->
+                <div class="tab-pane fade card-glass p-4" id="ai" role="tabpanel">
+                    <h5 class="fw-bold text-white mb-3"><i class="fas fa-brain text-purple me-2"></i> AI Recommendation & Explainability (XAI)</h5>
+                    {% set ai_rec = app.ai %}
+                    {% if ai_rec %}
+                        <div class="d-flex align-items-center gap-4 mb-4 p-3 bg-dark rounded border border-secondary">
+                            <div>
+                                <span class="text-secondary small d-block">Suitability Score:</span>
+                                <span class="fs-2 fw-bold text-indigo">{{ ai_rec.suitability_score }}%</span>
+                            </div>
+                            <div>
+                                <span class="text-secondary small d-block">Recommendation Category:</span>
+                                <span class="badge badge-highly-rec fs-6">{{ ai_rec.recommendation }}</span>
+                            </div>
+                        </div>
+
+                        <div style="height: 220px; position: relative;" class="mb-4">
+                            <canvas id="adminChartXAI"></canvas>
+                        </div>
+                    {% else %}
+                        <p class="text-secondary">AI recommendation not generated yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Admission Officer Decision Panel -->
+        <div class="col-lg-4">
+            <div class="card-glass p-4 sticky-top" style="top: 90px;">
+                <h5 class="fw-bold text-white mb-3"><i class="fas fa-gavel text-indigo me-2"></i> Admission Officer Decision</h5>
+                
+                <p class="text-secondary small">
+                    <strong>Human-in-the-Loop Principle:</strong> The AI suitability score is a recommendation. You maintain final authority to Accept, Reject, or Hold this candidate.
+                </p>
+
+                <!-- Current AI Recommendation Callout -->
+                {% if app.ai %}
+                <div class="p-3 mb-3 bg-dark rounded border border-indigo text-center">
+                    <span class="text-secondary small d-block">AI Decision-Support Output:</span>
+                    <span class="fw-bold text-indigo fs-5">{{ app.ai.recommendation }} ({{ app.ai.suitability_score }}%)</span>
+                </div>
+                {% endif %}
+
+                <!-- Existing Officer Decision if already submitted -->
+                {% if app.decision %}
+                <div class="p-3 mb-3 bg-dark rounded border border-secondary">
+                    <span class="text-secondary small d-block">Current Recorded Decision:</span>
+                    <span class="badge bg-success fs-6 mb-2">{{ app.decision.decision }}</span>
+                    {% if app.decision.is_override %}
+                        <span class="badge bg-warning text-dark d-block mb-2"><i class="fas fa-user-shield me-1"></i> HUMAN OVERRIDE ACTIVE</span>
+                    {% endif %}
+                    <span class="text-white small d-block">Comment: {{ app.decision.comments }}</span>
+                </div>
+                {% endif %}
+
+                <!-- Officer Form -->
+                <form method="POST" action="{{ url_for('admin.save_decision', app_id=app.id) }}">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Select Action</label>
+                        <select name="decision" class="form-select form-select-dark" required>
+                            <option value="ACCEPTED" {% if app.decision and app.decision.decision == 'ACCEPTED' %}selected{% endif %}>Accept / Admit Candidate</option>
+                            <option value="REJECTED" {% if app.decision and app.decision.decision == 'REJECTED' %}selected{% endif %}>Reject Application</option>
+                            <option value="ON_HOLD" {% if app.decision and app.decision.decision == 'ON_HOLD' %}selected{% endif %}>Put On Hold (Requires Action)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Officer Remarks & Justification *</label>
+                        <textarea name="comments" class="form-control form-control-dark" rows="3" placeholder="Explain the rationale for your final decision..." required>{{ app.decision.comments if app.decision else '' }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-emerald w-100 py-2">
+                        <i class="fas fa-save me-2"></i> Save Final Decision
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if app.ai %}
+    const featureData = {{ app.ai.feature_importance | tojson }};
+    renderFeatureImportanceChart('adminChartXAI', featureData);
+    {% endif %}
+});
+</script>
+{% endblock %}

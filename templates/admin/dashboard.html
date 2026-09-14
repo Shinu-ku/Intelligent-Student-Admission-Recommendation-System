@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Admission Officer Command Center | UniAdmission.AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
+    <div class="card-glass p-4 mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between">
+            <div>
+                <span class="badge bg-indigo text-white mb-2"><i class="fas fa-user-shield me-1"></i> Human-in-the-Loop Administrative Portal</span>
+                <h2 class="fw-bold text-white mb-1">Admission Officer Command Center</h2>
+                <p class="text-secondary small mb-0">Overview of university applicant intake, OCR audits, eligibility checks, and AI decision-support outputs</p>
+            </div>
+            <div class="d-flex gap-2 mt-3 mt-sm-0">
+                <a href="{{ url_for('admin.applications') }}" class="btn btn-primary-custom">
+                    <i class="fas fa-list me-1"></i> All Applications
+                </a>
+                <a href="{{ url_for('admin.analytics') }}" class="btn btn-outline-light">
+                    <i class="fas fa-chart-line me-1"></i> Analytics
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Metric Cards Grid -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card-glass p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-secondary small text-uppercase fw-semibold">Total Applications</span>
+                        <h2 class="fw-bold text-white mb-0 mt-1">{{ metrics.total_apps }}</h2>
+                    </div>
+                    <div class="p-3 rounded-circle bg-dark text-indigo fs-3"><i class="fas fa-folder-open"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card-glass p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-secondary small text-uppercase fw-semibold">Pending Review</span>
+                        <h2 class="fw-bold text-amber mb-0 mt-1">{{ metrics.pending_review }}</h2>
+                    </div>
+                    <div class="p-3 rounded-circle bg-dark text-amber fs-3"><i class="fas fa-clock"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card-glass p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-secondary small text-uppercase fw-semibold">Eligible Candidates</span>
+                        <h2 class="fw-bold text-emerald mb-0 mt-1">{{ metrics.eligible_count }}</h2>
+                    </div>
+                    <div class="p-3 rounded-circle bg-dark text-emerald fs-3"><i class="fas fa-check-circle"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card-glass p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-secondary small text-uppercase fw-semibold">AI Recommended</span>
+                        <h2 class="fw-bold text-purple mb-0 mt-1">{{ metrics.highly_rec }}</h2>
+                    </div>
+                    <div class="p-3 rounded-circle bg-dark text-purple fs-3"><i class="fas fa-brain"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Applications Table -->
+    <div class="card-glass p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-white mb-0"><i class="fas fa-clock text-indigo me-2"></i> Recent Application Submissions</h5>
+            <a href="{{ url_for('admin.applications') }}" class="text-indigo text-decoration-none small fw-semibold">View All Applications &rarr;</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>App Number</th>
+                        <th>Student Name</th>
+                        <th>Course</th>
+                        <th>Class 12 %</th>
+                        <th>Entrance</th>
+                        <th>Eligibility</th>
+                        <th>AI Suitability</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in recent_apps %}
+                    <tr>
+                        <td class="fw-bold text-indigo">{{ app.application_number }}</td>
+                        <td class="text-white fw-semibold">{{ app.student_name }}</td>
+                        <td class="text-secondary small">{{ app.course }}</td>
+                        <td class="text-white">{{ app.class12_percentage or '-' }}%</td>
+                        <td class="text-white">{{ app.entrance_score or '-' }}</td>
+                        <td>
+                            {% if app.is_eligible == 1 %}
+                                <span class="badge bg-success"><i class="fas fa-check me-1"></i> Eligible</span>
+                            {% elif app.is_eligible == 0 %}
+                                <span class="badge bg-danger"><i class="fas fa-times me-1"></i> Ineligible</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if app.suitability_score %}
+                                <span class="fw-bold text-indigo">{{ app.suitability_score }}%</span>
+                                <div class="small text-secondary">{{ app.recommendation }}</div>
+                            {% else %}
+                                <span class="text-secondary small">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if app.status == 'ACCEPTED' %}
+                                <span class="badge bg-success">ACCEPTED</span>
+                            {% elif app.status == 'REJECTED' %}
+                                <span class="badge bg-danger">REJECTED</span>
+                            {% elif app.status == 'ON_HOLD' %}
+                                <span class="badge bg-warning text-dark">ON HOLD</span>
+                            {% else %}
+                                <span class="badge bg-info text-dark">UNDER REVIEW</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin.applicant_detail', app_id=app.id) }}" class="btn btn-sm btn-primary-custom">
+                                Inspect <i class="fas fa-eye ms-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

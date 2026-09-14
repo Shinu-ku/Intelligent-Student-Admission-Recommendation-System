@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}AI Model Metrics & Transparency | UniAdmission.AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="card-glass p-4 mb-4">
+        <h2 class="fw-bold text-white mb-1"><i class="fas fa-microchip text-indigo me-2"></i> Random Forest Model Metrics & Transparency</h2>
+        <p class="text-secondary small mb-0">Model evaluation scores, synthetic dataset parameters, and global feature importance distributions</p>
+    </div>
+
+    <!-- Mandatory Disclaimer Alert -->
+    <div class="alert alert-warning card-glass border-0 d-flex align-items-center mb-4">
+        <i class="fas fa-exclamation-triangle text-warning fs-2 me-3"></i>
+        <div>
+            <h6 class="fw-bold text-white mb-1">Synthetic Academic Demonstration Disclaimer</h6>
+            <p class="mb-0 small text-secondary">
+                This machine learning model is trained using synthetic demonstration data. Its predictions should not be used for real university admission decisions.
+            </p>
+        </div>
+    </div>
+
+    <!-- Metric Counter Widgets -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="card-glass p-4 text-center">
+                <span class="text-secondary small text-uppercase fw-semibold">Accuracy</span>
+                <h2 class="display-6 fw-bold text-emerald mb-0 mt-1">{{ (metrics.accuracy * 100) | round(2) }}%</h2>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card-glass p-4 text-center">
+                <span class="text-secondary small text-uppercase fw-semibold">Precision</span>
+                <h2 class="display-6 fw-bold text-indigo mb-0 mt-1">{{ (metrics.precision * 100) | round(2) }}%</h2>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card-glass p-4 text-center">
+                <span class="text-secondary small text-uppercase fw-semibold">Recall</span>
+                <h2 class="display-6 fw-bold text-purple mb-0 mt-1">{{ (metrics.recall * 100) | round(2) }}%</h2>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card-glass p-4 text-center">
+                <span class="text-secondary small text-uppercase fw-semibold">F1 Score</span>
+                <h2 class="display-6 fw-bold text-amber mb-0 mt-1">{{ (metrics.f1_score * 100) | round(2) }}%</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Details Grid -->
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card-glass p-4 h-100">
+                <h5 class="fw-bold text-white mb-3"><i class="fas fa-info-circle text-indigo me-2"></i> Model Architecture</h5>
+                <ul class="list-group list-group-flush bg-transparent">
+                    <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between">
+                        <span class="text-secondary">Algorithm:</span>
+                        <span class="fw-bold text-indigo">RandomForestClassifier</span>
+                    </li>
+                    <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between">
+                        <span class="text-secondary">Estimators:</span>
+                        <span class="fw-bold">100 Trees</span>
+                    </li>
+                    <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between">
+                        <span class="text-secondary">Max Tree Depth:</span>
+                        <span class="fw-bold">10</span>
+                    </li>
+                    <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between">
+                        <span class="text-secondary">Dataset Records:</span>
+                        <span class="fw-bold text-emerald">{{ metrics.dataset_size }} Synthetic Applicants</span>
+                    </li>
+                    <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between">
+                        <span class="text-secondary">Preprocessing:</span>
+                        <span class="fw-bold">StandardScaler Normalization</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card-glass p-4 h-100">
+                <h5 class="fw-bold text-white mb-3"><i class="fas fa-sliders-h text-purple me-2"></i> Global Feature Importance</h5>
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Feature Name</th>
+                                <th>Global Importance Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for feat, weight in metrics.feature_importance.items() %}
+                            <tr>
+                                <td class="fw-bold text-white">{{ feat }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress flex-grow-1 me-2" style="height: 6px; background: rgba(255,255,255,0.1);">
+                                            <div class="progress-bar bg-indigo" style="width: {{ (weight * 100) if weight <= 1 else weight }}%;"></div>
+                                        </div>
+                                        <span class="small fw-bold text-indigo">{{ weight | round(2) }}</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard | UniAdmission.AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Welcome Header Card -->
+    <div class="card-glass p-4 mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="p-3 rounded-circle bg-dark text-indigo me-3 fs-4"><i class="fas fa-user-graduate"></i></div>
+                    <div>
+                        <h2 class="fw-bold text-white mb-0">Welcome, {{ user.full_name }}</h2>
+                        <p class="text-secondary mb-0 small">Student Portal & Application Tracker</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                {% if app %}
+                    <span class="text-secondary small d-block">Application ID:</span>
+                    <span class="fs-5 fw-bold text-white brand-font">{{ app.application_number }}</span>
+                {% else %}
+                    <a href="{{ url_for('application.apply') }}" class="btn btn-primary-custom">
+                        <i class="fas fa-plus me-1"></i> Start Application
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if app %}
+    <!-- Application Progress Tracker -->
+    <div class="card-glass p-4 mb-4">
+        <h5 class="fw-bold text-white mb-4"><i class="fas fa-stream text-indigo me-2"></i> Application Status Tracker</h5>
+        
+        {% set status = app.status %}
+        {% set step1 = status in ['SUBMITTED', 'DOCUMENTS_PENDING', 'DOCUMENT_VERIFICATION', 'ELIGIBILITY_REVIEW', 'AI_ANALYSIS', 'OFFICER_REVIEW', 'ACCEPTED', 'REJECTED', 'ON_HOLD'] %}
+        {% set step2 = app.documents | length >= 5 %}
+        {% set step3 = app.documents | length >= 5 and not (app.documents | selectattr('verification_status', 'equalto', 'PENDING') | list) %}
+        {% set step4 = app.eligibility is not none %}
+        {% set step5 = app.ai is not none %}
+        {% set step6 = status in ['OFFICER_REVIEW', 'ACCEPTED', 'REJECTED', 'ON_HOLD'] %}
+        {% set step7 = status in ['ACCEPTED', 'REJECTED', 'ON_HOLD'] %}
+
+        <div class="progress-tracker px-3">
+            <div class="text-center">
+                <div class="tracker-step {% if step1 %}completed{% endif %}"><i class="fas fa-file-alt"></i></div>
+                <div class="tracker-label">Submitted</div>
+            </div>
+            <div class="text-center">
+                <div class="tracker-step {% if step2 %}completed{% else %}active{% endif %}"><i class="fas fa-upload"></i></div>
+                <div class="tracker-label">Docs Uploaded</div>
+            </div>
+            <div class="text-center">
+                <div class="tracker-step {% if step3 %}completed{% endif %}"><i class="fas fa-search"></i></div>
+                <div class="tracker-label">OCR Verified</div>
+            </div>
+            <div class="text-center">
+                <div class="tracker-step {% if step4 %}completed{% endif %}"><i class="fas fa-check-double"></i></div>
+                <div class="tracker-label">Eligibility</div>
+            </div>
+            <div class="text-center">
+                <div class="tracker-step {% if step5 %}completed{% endif %}"><i class="fas fa-brain"></i></div>
+                <div class="tracker-label">AI Analysis</div>
+            </div>
+            <div class="text-center">
+                <div class="tracker-step {% if step6 %}completed{% endif %}"><i class="fas fa-user-clock"></i></div>
+                <div class="tracker-label">Officer Review</div>
+            </div>
+            <div class="text-center">
+                <div class="tracker-step {% if step7 %}completed{% endif %}"><i class="fas fa-award"></i></div>
+                <div class="tracker-label">Final Decision</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Status Cards Grid -->
+    <div class="row g-4 mb-4">
+        <!-- Course Info -->
+        <div class="col-md-4">
+            <div class="card-glass p-4 h-100">
+                <span class="text-secondary small text-uppercase fw-semibold">Target Course</span>
+                <h5 class="text-white fw-bold mt-1 mb-2">{{ app.course }}</h5>
+                <a href="{{ url_for('application.apply') }}" class="text-indigo text-decoration-none small"><i class="fas fa-edit me-1"></i> Edit Academic Form</a>
+            </div>
+        </div>
+
+        <!-- Eligibility Status -->
+        <div class="col-md-4">
+            <div class="card-glass p-4 h-100">
+                <span class="text-secondary small text-uppercase fw-semibold">Rule Engine Eligibility</span>
+                {% if app.eligibility %}
+                    {% if app.eligibility.is_eligible %}
+                        <h5 class="text-emerald fw-bold mt-1 mb-2"><i class="fas fa-check-circle me-1"></i> ELIGIBLE</h5>
+                    {% else %}
+                        <h5 class="text-rose fw-bold mt-1 mb-2"><i class="fas fa-times-circle me-1"></i> NOT ELIGIBLE</h5>
+                    {% endif %}
+                    <a href="{{ url_for('eligibility.check_eligibility') }}" class="text-indigo text-decoration-none small"><i class="fas fa-list-check me-1"></i> View Rule Breakdown</a>
+                {% else %}
+                    <h5 class="text-warning fw-bold mt-1 mb-2"><i class="fas fa-clock me-1"></i> Pending Check</h5>
+                    <a href="{{ url_for('eligibility.check_eligibility') }}" class="btn btn-sm btn-outline-warning rounded-pill mt-2">Run Eligibility Check</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- AI Suitability Score -->
+        <div class="col-md-4">
+            <div class="card-glass p-4 h-100">
+                <span class="text-secondary small text-uppercase fw-semibold">AI Recommendation</span>
+                {% if app.ai %}
+                    <h5 class="text-indigo fw-bold mt-1 mb-2">
+                        {{ app.ai.suitability_score }}% &bull; {{ app.ai.recommendation }}
+                    </h5>
+                    <a href="{{ url_for('ai.analyze') }}" class="text-indigo text-decoration-none small"><i class="fas fa-brain me-1"></i> View XAI Explainability</a>
+                {% else %}
+                    <h5 class="text-warning fw-bold mt-1 mb-2"><i class="fas fa-robot me-1"></i> Pending Analysis</h5>
+                    <a href="{{ url_for('ai.analyze') }}" class="btn btn-sm btn-outline-info rounded-pill mt-2">Run AI Recommendation</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Officer Decision Card if decided -->
+    {% if app.decision %}
+    <div class="card-glass p-4 border border-indigo">
+        <h5 class="fw-bold text-white mb-2"><i class="fas fa-gavel text-indigo me-2"></i> Final Admission Officer Decision</h5>
+        <div class="d-flex align-items-center gap-3 mt-3">
+            {% if app.decision.decision == 'ACCEPTED' %}
+                <span class="badge bg-success fs-5 px-4 py-2"><i class="fas fa-check-circle me-2"></i> ADMITTED / ACCEPTED</span>
+            {% elif app.decision.decision == 'REJECTED' %}
+                <span class="badge bg-danger fs-5 px-4 py-2"><i class="fas fa-times-circle me-2"></i> APPLICATION REJECTED</span>
+            {% else %}
+                <span class="badge bg-warning text-dark fs-5 px-4 py-2"><i class="fas fa-pause-circle me-2"></i> ON HOLD</span>
+            {% endif %}
+            <div>
+                <span class="text-secondary small d-block">Officer Comments:</span>
+                <span class="text-white">{{ app.decision.comments or 'No comments provided.' }}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty Application State -->
+    <div class="card-glass p-5 text-center my-4">
+        <i class="fas fa-folder-plus text-indigo display-1 mb-3"></i>
+        <h3 class="text-white fw-bold">No Active Application Found</h3>
+        <p class="text-secondary mb-4">Complete your 5-step admission application form to start document OCR and AI evaluation.</p>
+        <a href="{{ url_for('application.apply') }}" class="btn btn-primary-custom btn-lg">
+            <i class="fas fa-paper-plane me-2"></i> Fill Application Form
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

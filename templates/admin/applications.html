@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Application Management | UniAdmission.AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
+    <div class="card-glass p-4 mb-4">
+        <h2 class="fw-bold text-white mb-1"><i class="fas fa-users-cog text-indigo me-2"></i> Application Directory</h2>
+        <p class="text-secondary small mb-0">Search, filter, and review university candidate records</p>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div class="card-glass p-4 mb-4">
+        <form method="GET" action="{{ url_for('admin.applications') }}" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label text-secondary small fw-semibold">Search Applicant</label>
+                <input type="text" name="search" class="form-control form-control-dark" placeholder="Name, App ID, or Email..." value="{{ current_filters.search or '' }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-secondary small fw-semibold">Course Program</label>
+                <select name="course" class="form-select form-select-dark">
+                    <option value="">All Courses</option>
+                    <option value="B.Tech Computer Science & Engineering" {% if current_filters.course == 'B.Tech Computer Science & Engineering' %}selected{% endif %}>B.Tech CSE</option>
+                    <option value="B.Tech Information Technology" {% if current_filters.course == 'B.Tech Information Technology' %}selected{% endif %}>B.Tech IT</option>
+                    <option value="B.Tech Electronics & Communication" {% if current_filters.course == 'B.Tech Electronics & Communication' %}selected{% endif %}>B.Tech ECE</option>
+                    <option value="B.Tech Mechanical Engineering" {% if current_filters.course == 'B.Tech Mechanical Engineering' %}selected{% endif %}>B.Tech ME</option>
+                    <option value="B.Tech Electrical Engineering" {% if current_filters.course == 'B.Tech Electrical Engineering' %}selected{% endif %}>B.Tech EE</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-secondary small fw-semibold">Eligibility</label>
+                <select name="eligibility" class="form-select form-select-dark">
+                    <option value="">All</option>
+                    <option value="Eligible" {% if current_filters.eligibility == 'Eligible' %}selected{% endif %}>Eligible Only</option>
+                    <option value="Not Eligible" {% if current_filters.eligibility == 'Not Eligible' %}selected{% endif %}>Not Eligible Only</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-secondary small fw-semibold">AI Recommendation</label>
+                <select name="recommendation" class="form-select form-select-dark">
+                    <option value="">All</option>
+                    <option value="Highly Recommended" {% if current_filters.recommendation == 'Highly Recommended' %}selected{% endif %}>Highly Recommended</option>
+                    <option value="Recommended" {% if current_filters.recommendation == 'Recommended' %}selected{% endif %}>Recommended</option>
+                    <option value="Review Required" {% if current_filters.recommendation == 'Review Required' %}selected{% endif %}>Review Required</option>
+                    <option value="Low Recommendation" {% if current_filters.recommendation == 'Low Recommendation' %}selected{% endif %}>Low Recommendation</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary-custom w-100"><i class="fas fa-filter me-1"></i> Filter</button>
+                <a href="{{ url_for('admin.applications') }}" class="btn btn-outline-secondary"><i class="fas fa-undo"></i></a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="card-glass p-4 mb-4">
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>App ID</th>
+                        <th>Student Name</th>
+                        <th>Course</th>
+                        <th>Class 12 %</th>
+                        <th>Entrance Score</th>
+                        <th>Eligibility</th>
+                        <th>AI Score</th>
+                        <th>AI Recommendation</th>
+                        <th>Officer Decision</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in apps %}
+                    <tr>
+                        <td class="fw-bold text-indigo">{{ app.application_number }}</td>
+                        <td class="text-white fw-semibold">{{ app.student_name }}</td>
+                        <td class="text-secondary small">{{ app.course }}</td>
+                        <td class="text-white">{{ app.class12_percentage or '-' }}%</td>
+                        <td class="text-white">{{ app.entrance_score or '-' }}</td>
+                        <td>
+                            {% if app.is_eligible == 1 %}
+                                <span class="badge bg-success"><i class="fas fa-check me-1"></i> Eligible</span>
+                            {% elif app.is_eligible == 0 %}
+                                <span class="badge bg-danger"><i class="fas fa-times me-1"></i> Ineligible</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td class="fw-bold text-white">{{ app.suitability_score or '-' }}%</td>
+                        <td>
+                            {% if app.recommendation == 'Highly Recommended' %}
+                                <span class="badge badge-highly-rec">Highly Recommended</span>
+                            {% elif app.recommendation == 'Recommended' %}
+                                <span class="badge badge-rec">Recommended</span>
+                            {% elif app.recommendation == 'Review Required' %}
+                                <span class="badge badge-review">Review Required</span>
+                            {% elif app.recommendation == 'Low Recommendation' %}
+                                <span class="badge badge-low">Low Recommendation</span>
+                            {% else %}
+                                <span class="text-secondary small">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if app.officer_decision == 'ACCEPTED' %}
+                                <span class="badge bg-success">ACCEPTED</span>
+                            {% elif app.officer_decision == 'REJECTED' %}
+                                <span class="badge bg-danger">REJECTED</span>
+                            {% elif app.officer_decision == 'ON_HOLD' %}
+                                <span class="badge bg-warning text-dark">ON HOLD</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Pending Decision</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin.applicant_detail', app_id=app.id) }}" class="btn btn-sm btn-primary-custom">
+                                360° Review <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center py-4 text-secondary">No matching applications found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

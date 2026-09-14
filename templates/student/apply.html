@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Application Form | UniAdmission.AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card-glass p-4 p-md-5">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-white mb-1"><i class="fas fa-file-signature text-indigo me-2"></i> University Admission Application</h2>
+            <p class="text-secondary small">Complete all 5 steps to submit your candidate profile</p>
+        </div>
+
+        <!-- Wizard Tracker Header -->
+        <div class="progress-tracker mb-5 px-md-5">
+            <div class="text-center">
+                <div id="indicatorStep1" class="tracker-step active">1</div>
+                <div class="tracker-label">Personal</div>
+            </div>
+            <div class="text-center">
+                <div id="indicatorStep2" class="tracker-step">2</div>
+                <div class="tracker-label">Academic</div>
+            </div>
+            <div class="text-center">
+                <div id="indicatorStep3" class="tracker-step">3</div>
+                <div class="tracker-label">Course</div>
+            </div>
+            <div class="text-center">
+                <div id="indicatorStep4" class="tracker-step">4</div>
+                <div class="tracker-label">Additional</div>
+            </div>
+            <div class="text-center">
+                <div id="indicatorStep5" class="tracker-step">5</div>
+                <div class="tracker-label">Review</div>
+            </div>
+        </div>
+
+        <form id="applicationWizardForm" method="POST" action="{{ url_for('application.apply') }}">
+            
+            <!-- STEP 1: Personal Information -->
+            <div id="wizardStep1" class="wizard-step-container">
+                <h5 class="text-indigo fw-bold mb-3"><i class="fas fa-user me-2"></i> Step 1: Personal Information</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small">Full Name *</label>
+                        <input type="text" name="full_name" class="form-control form-control-dark" value="{{ user.full_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small">Email Address *</label>
+                        <input type="email" name="email" class="form-control form-control-dark" value="{{ user.email }}" required readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Phone Number *</label>
+                        <input type="tel" name="phone" class="form-control form-control-dark" value="{{ user.phone or '' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Date of Birth *</label>
+                        <input type="date" name="dob" class="form-control form-control-dark" value="{{ user.dob or '' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Gender *</label>
+                        <select name="gender" class="form-select form-select-dark">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-secondary small">Residential Address *</label>
+                        <textarea name="address" class="form-control form-control-dark" rows="2" placeholder="Full residential street address..." required>123 University Avenue, Tech Park</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Academic Information -->
+            <div id="wizardStep2" class="wizard-step-container" style="display: none;">
+                <h5 class="text-indigo fw-bold mb-3"><i class="fas fa-graduation-cap me-2"></i> Step 2: Academic Information</h5>
+                
+                {% set ac = app_data.academic if app_data and app_data.academic else None %}
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small">Class 10 Percentage (%) *</label>
+                        <input type="number" step="0.1" min="0" max="100" name="class10_percentage" class="form-control form-control-dark" value="{{ ac.class10_percentage if ac else '88.5' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small">Class 12 Aggregate Percentage (%) *</label>
+                        <input type="number" step="0.1" min="0" max="100" name="class12_percentage" class="form-control form-control-dark" value="{{ ac.class12_percentage if ac else '89.0' }}" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Mathematics Score (0-100) *</label>
+                        <input type="number" step="0.1" min="0" max="100" name="mathematics" class="form-control form-control-dark" value="{{ ac.mathematics if ac else '91.0' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Physics Score (0-100) *</label>
+                        <input type="number" step="0.1" min="0" max="100" name="physics" class="form-control form-control-dark" value="{{ ac.physics if ac else '87.0' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Chemistry Score (0-100) *</label>
+                        <input type="number" step="0.1" min="0" max="100" name="chemistry" class="form-control form-control-dark" value="{{ ac.chemistry if ac else '89.0' }}" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Entrance Exam Name *</label>
+                        <select name="entrance_exam" class="form-select form-select-dark">
+                            <option value="JEE Main" {% if ac and ac.entrance_exam == 'JEE Main' %}selected{% endif %}>JEE Main</option>
+                            <option value="CUET" {% if ac and ac.entrance_exam == 'CUET' %}selected{% endif %}>CUET</option>
+                            <option value="State CET" {% if ac and ac.entrance_exam == 'State CET' %}selected{% endif %}>State CET</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Entrance Exam Score / Percentile *</label>
+                        <input type="number" step="0.1" min="0" max="100" name="entrance_score" class="form-control form-control-dark" value="{{ ac.entrance_score if ac else '82.0' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Passing Year *</label>
+                        <input type="number" name="passing_year" class="form-control form-control-dark" value="{{ ac.passing_year if ac else '2025' }}" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-secondary small">School Name & Board *</label>
+                        <input type="text" name="school_board" class="form-control form-control-dark" value="{{ ac.school_board if ac else 'Central Board of Secondary Education (CBSE)' }}" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Course Selection -->
+            <div id="wizardStep3" class="wizard-step-container" style="display: none;">
+                <h5 class="text-indigo fw-bold mb-3"><i class="fas fa-book me-2"></i> Step 3: Select Degree Program</h5>
+                <p class="text-secondary small">Rule-based eligibility requirements vary depending on course branch.</p>
+                
+                <div class="row g-3">
+                    {% for course_item in courses %}
+                    <div class="col-12">
+                        <div class="card-glass p-3 border-0">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="course" id="course_{{ loop.index }}" value="{{ course_item }}" {% if (app_data and app_data.course == course_item) or loop.first %}checked{% endif %}>
+                                <label class="form-check-label text-white fw-bold ms-2" for="course_{{ loop.index }}">
+                                    {{ course_item }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- STEP 4: Additional Information -->
+            <div id="wizardStep4" class="wizard-step-container" style="display: none;">
+                <h5 class="text-indigo fw-bold mb-3"><i class="fas fa-award me-2"></i> Step 4: Additional Achievements & SOP</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small">Academic Achievements & Olympiads</label>
+                        <textarea name="achievements" class="form-control form-control-dark" rows="3" placeholder="List awards, hackathons, or rank certificates (one per line)">{{ ac.achievements if ac else 'State Level Science Exhibition Gold Medalist\nNational Cyber Challenge Top 10' }}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small">Certifications & Courses</label>
+                        <textarea name="certifications" class="form-control form-control-dark" rows="3" placeholder="List industry certifications (e.g. Coursera, AWS, NPTEL)">{{ ac.certifications if ac else 'Python for Data Science\nAWS Cloud Practitioner Essentials' }}</textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-secondary small">Statement of Purpose (SOP)</label>
+                        <textarea name="sop" class="form-control form-control-dark" rows="3" placeholder="Write a short statement on why you wish to pursue this engineering branch...">{{ ac.sop if ac else 'Passionately driven to excel in computer engineering and artificial intelligence systems.' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: Review & Submit -->
+            <div id="wizardStep5" class="wizard-step-container" style="display: none;">
+                <h5 class="text-indigo fw-bold mb-3"><i class="fas fa-check-double me-2"></i> Step 5: Review Application Summary</h5>
+                <div class="card-glass p-4 mb-3">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <span class="text-secondary small d-block">Applicant Name:</span>
+                            <span class="text-white fw-bold">{{ user.full_name }}</span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <span class="text-secondary small d-block">Selected Course:</span>
+                            <span class="text-indigo fw-bold">B.Tech Computer Science & Engineering</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="text-secondary small d-block">Class 12 %:</span>
+                            <span class="text-white fw-bold">89.0%</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="text-secondary small d-block">Mathematics Score:</span>
+                            <span class="text-white fw-bold">91.0</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="text-secondary small d-block">Entrance Score:</span>
+                            <span class="text-white fw-bold">82.0</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-secondary small">By submitting, you certify that the information entered is accurate to the best of your knowledge.</p>
+            </div>
+
+            <!-- Wizard Navigation Buttons -->
+            <div class="d-flex justify-content-between mt-4 pt-3 border-top border-secondary">
+                <button type="button" id="btnWizardPrev" class="btn btn-outline-light rounded-3" style="display: none;">
+                    <i class="fas fa-arrow-left me-1"></i> Previous
+                </button>
+                <div class="ms-auto">
+                    <button type="button" id="btnWizardNext" class="btn btn-primary-custom px-4">
+                        Next <i class="fas fa-arrow-right ms-1"></i>
+                    </button>
+                    <button type="submit" id="btnWizardSubmit" class="btn btn-emerald px-4" style="display: none;">
+                        <i class="fas fa-paper-plane me-1"></i> Submit Application
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

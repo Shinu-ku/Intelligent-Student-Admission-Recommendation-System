@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}System Analytics | UniAdmission.AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
+    <div class="card-glass p-4 mb-4">
+        <h2 class="fw-bold text-white mb-1"><i class="fas fa-chart-pie text-indigo me-2"></i> Admission Analytics & Processing Funnel</h2>
+        <p class="text-secondary small mb-0">Real-time database metrics, course distributions, and conversion metrics</p>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="row g-4 mb-4">
+        <!-- 1. Course Distribution -->
+        <div class="col-md-6">
+            <div class="card-glass p-4 h-100">
+                <h5 class="fw-bold text-white mb-3"><i class="fas fa-book text-indigo me-2"></i> Applications by Course</h5>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="chartCourses"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Eligibility Breakdown -->
+        <div class="col-md-6">
+            <div class="card-glass p-4 h-100">
+                <h5 class="fw-bold text-white mb-3"><i class="fas fa-check-circle text-emerald me-2"></i> Eligibility Distribution</h5>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="chartEligibility"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. AI Recommendation Distribution -->
+        <div class="col-md-6">
+            <div class="card-glass p-4 h-100">
+                <h5 class="fw-bold text-white mb-3"><i class="fas fa-brain text-purple me-2"></i> AI Recommendation Breakdown</h5>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="chartRecommendation"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Processing Funnel -->
+        <div class="col-md-6">
+            <div class="card-glass p-4 h-100">
+                <h5 class="fw-bold text-white mb-3"><i class="fas fa-filter text-amber me-2"></i> Application Processing Funnel</h5>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="chartFunnel"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const analyticsData = {{ chart_data | tojson }};
+    renderAnalyticsCharts(analyticsData);
+});
+</script>
+{% endblock %}
